@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿	using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -21,11 +21,12 @@ public class vr_pres_client : MonoBehaviour {
 	public Color fadecolor;
 	Texture2D slide;
 	public string[] textureNames;
-
 	private string nextTexture;
 
-	public VideoClip[] videoclips;
+	public string[] videoNames;
+	private string nextVideo;
 
+	public VideoClip[] videoclips;
 	private VideoClip nextclip;
 
 	public bool useTextures = false;
@@ -70,22 +71,30 @@ public class vr_pres_client : MonoBehaviour {
 	private string titleText = "";
 	private string contentText = "";
 
-	private VideoPlayer videoPlayer;
+	private GvrVideoPlayerTexture videoPlayer;
+
+	private bool done;
+	private float t;
+	public float delay = 5f;
+	public bool loop = false;
 
 
 	// Use this for initialization
 	void Start () {
 
+		videoPlayer = dome.GetComponent<GvrVideoPlayerTexture> ();
+		if (videoPlayer != null) {
+			videoPlayer.Init ();
+		}
+
+
+
 		//ChangeTexture (textureNames [0]);
-		ChangeVideo(videoclips[0]);
+		//ChangeVideo(videoclips[0]);
+		Change360Video(videoNames[0]);
 
 		listenerCoroutine = isConnectionActive ();
 		StartCoroutine (listenerCoroutine);
-
-		//faderCoroutine = Gui_fade ();
-		//StartCoroutine(faderCoroutine)
-
-
 
 	}
 	
@@ -113,7 +122,7 @@ public class vr_pres_client : MonoBehaviour {
 
 		if (currentSlide != targetSlide) {
 			//ChangeTexture (textureNames [targetVideo]);
-			ChangeVideo(videoclips[targetVideo]);
+			Change360Video(videoNames[targetVideo]);
 			currentSlide = targetSlide;
 		}
 
@@ -126,6 +135,32 @@ public class vr_pres_client : MonoBehaviour {
 		if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Began) {
 			GvrCardboardHelpers.Recenter ();
 		}
+
+
+		// Take care of the video loop
+		if (videoPlayer == null) {
+			return;
+		} else if (videoPlayer.PlayerState == GvrVideoPlayerTexture.VideoPlayerState.Ended && done) {
+			videoPlayer.Pause();
+			videoPlayer.CurrentPosition = 0;
+			done = false;
+			t = 0f;
+			return;
+		}
+		if (done) {
+			return;
+		}
+
+		t += Time.deltaTime;
+		Debug.Log (videoPlayer.PlayerState);
+		if (t >= delay && videoPlayer != null) {
+			videoPlayer.Play();
+			Debug.Log ("playing");
+			done = true;
+		}
+
+		Debug.Log (videoPlayer.videoURL);
+
 
 				
 	}
@@ -290,6 +325,13 @@ public class vr_pres_client : MonoBehaviour {
 		nextclip = clip;
 	}
 
+	void Change360Video(string videoName){
+		doFade ();
+		nextVideo = videoName;
+
+		videoPlayer.Play();
+	}
+
 	void doFade()
 	{
 		bShouldFade = true;
@@ -331,8 +373,10 @@ public class vr_pres_client : MonoBehaviour {
 				} else {
 					if (!bLoadingVideo) {
 						bVideoLoaded = false;
-						StartCoroutine (playVideo());
 						bLoadingVideo = true;
+
+						//should not be here
+						bVideoLoaded = true;
 					} else if (bVideoLoaded) {
 						fadeDir = -1.0f;
 						bLoadingVideo = false;
@@ -345,104 +389,35 @@ public class vr_pres_client : MonoBehaviour {
 				bShouldFade = false;
 			}
 
-
-			fadecolor.a = alpha;
-			//fadecolor.a = 0.0f;
+			//fadecolor.a = alpha;
+			fadecolor.a = 0.0f;
 
 			fade_canvas.GetComponent<Image>().color = fadecolor;
 
-			//GUI.depth = drawDepth;
 
-			//GUI.DrawTexture (new Rect (0, 0, Screen.width, Screen.height), fadeTexture);
 		}
-		//Debug.Log (string.Format("E: alpha : {0}    fadeDir : {1}    bLoadingVideo : {2}    isprep : {3}    shouldFade : {4}", alpha, fadeDir, bLoadingVideo, dome.GetComponent<VideoPlayer> ().isPrepared, bShouldFade));
+
 	}
 
 	IEnumerator playVideo()
 	{
 
-		//Add VideoPlayer to the GameObject
-		videoPlayer = dome.GetComponent<VideoPlayer> ();
 
-		if (videoPlayer != null) {
+		string videoUrl = string.Format ("jar:file://${Application.dataPath}!/assets/{0}", nextVideo);
+		Debug.Log (videoUrl);
 
-
-			while (!videoPlayer.isPrepared)
-			{
-				yield return null;
-			}
-
-			// avoid loading player when looping
-			float percentageFrame = ((float)videoPlayer.frame / (float)videoPlayer.frameCount);
-			Debug.Log (percentageFrame);
-			//videoPlayer.frame = 100;  // probably cause the freeze in playback
-			//videoPlayer.Stop ();  // probably cause the freeze in playback
-
-			/*
-			while (percentageFrame < 0.1f || percentageFrame > 0.9f)
-			{
-				Debug.Log (percentageFrame);
-				
-				yield return null;
-			}
-			*/
-
-			Destroy (videoPlayer);
-
-
-
-		}
-
-		Debug.Log("test");
-
-		//Add VideoPlayer to the GameObject
-		videoPlayer = dome.AddComponent<VideoPlayer>();
-
-		//Add AudioSource
-
-		//Disable Play on Awake for both Video and Audio
-		videoPlayer.playOnAwake = false;
-
-		videoPlayer.isLooping = true;
-
-		//We want to play from video clip not from url
-
-		//videoPlayer.clip = nextclip;
-		videoPlayer.source = VideoSource.VideoClip;
-		videoPlayer.clip = nextclip;
+		videoPlayer.videoURL = string.Format("jar:file://${Application.dataPath}!/assets/{0}", nextVideo);
 
 
 		//Set video To Play then prepare Audio to prevent Buffering
-		videoPlayer.Prepare();
-
-		//Wait until video is prepared
-		while (!videoPlayer.isPrepared)
-		{
-			yield return null;
-		}
-
-		Debug.Log("Done Preparing Video");
-
-		//Assign the Texture from Video to RawImage to be displayed
-		dome.GetComponent<Renderer> ().material.SetTexture ("_MainTex", videoPlayer.texture);
-		//image.texture = videoPlayer.texture;
+		videoPlayer.ReInitializeVideo ();
 
 		//Play Video
-		videoPlayer.Play();
-		Debug.Log("Playing Video");
-
-		/*
-		Debug.Log("Playing Video");
-		while (videoPlayer.isPlaying)
-		{
-			Debug.LogWarning("Video Time: " + Mathf.FloorToInt((float)videoPlayer.time));
-			yield return null;
-		}
-
-		Debug.Log("Done Playing Video");
-		*/
+		videoPlayer.Play ();
 
 		bVideoLoaded = true;
+
+		yield return null;
 
 	}
 

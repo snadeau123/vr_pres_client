@@ -259,7 +259,7 @@ GameObject:
   - component: {fileID: 305358219}
   - component: {fileID: 305358218}
   - component: {fileID: 305358217}
-  - component: {fileID: 305358221}
+  - component: {fileID: 305358222}
   m_Layer: 0
   m_Name: Dome
   m_TagString: Untagged
@@ -281,7 +281,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: b82b4cbf35419f4418dcd456023e0003, type: 2}
+  - {fileID: 2100000, guid: 38722f7e29e284a8bb3a91c83a5b8848, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -333,36 +333,25 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!328 &305358221
-VideoPlayer:
+--- !u!114 &305358222
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 305358216}
   m_Enabled: 1
-  m_VideoClip: {fileID: 32900000, guid: cc1a0f6d100f0fd45a9871865c6ef59c, type: 3}
-  m_TargetCameraAlpha: 1
-  m_TargetCamera: {fileID: 0}
-  m_TargetTexture: {fileID: 0}
-  m_TimeReference: 0
-  m_TargetMaterialRenderer: {fileID: 0}
-  m_TargetMaterialProperty: _MainTex
-  m_RenderMode: 3
-  m_AspectRatio: 2
-  m_DataSource: 0
-  m_PlaybackSpeed: 1
-  m_AudioOutputMode: 0
-  m_TargetAudioSources: []
-  m_DirectAudioVolumes: []
-  m_Url: 
-  m_EnabledAudioTracks: 
-  m_DirectAudioMutes: 
-  m_ControlledAudioTrackCount: 0
-  m_PlayOnAwake: 1
-  m_SkipOnDrop: 1
-  m_Looping: 1
-  m_WaitForFirstFrame: 1
-  m_FrameReadyEventEnabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 410d5a91205334dda9fd1bf3d325809a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  statusText: {fileID: 242554354}
+  videoType: 3
+  videoURL: jar:file://${Application.dataPath}!/assets/vid_bigbuckbunny.mp4
+  videoContentID: 
+  videoProviderId: 
+  initialResolution: 4096
+  adjustAspectRatio: 1
+  useSecurePath: 0
 --- !u!1 &701100784
 GameObject:
   m_ObjectHideFlags: 0
@@ -394,13 +383,20 @@ MonoBehaviour:
   canvas: {fileID: 2103377456}
   fade_canvas: {fileID: 1189457737}
   fadecolor: {r: 0, g: 0, b: 0, a: 0}
-  textureNames: []
+  textureNames:
+  - Videos/slide_01
+  - Videos/slide_02
+  videoNames:
+  - slide_03.mp4
+  - slide_04.mp4
   videoclips:
-  - {fileID: 32900000, guid: cc1a0f6d100f0fd45a9871865c6ef59c, type: 3}
+  - {fileID: 0}
   - {fileID: 32900000, guid: 1c8b16f32f5cc7049867897128738728, type: 3}
+  useTextures: 0
   currentSlide: 0
   targetSlide: 0
-  host: 127.0.0.1
+  targetVideo: 0
+  host: vrsrvj8j32h84h4239dk.breakingwalls.co
   port: 50007
   strMessage: 
   res: 
@@ -408,6 +404,8 @@ MonoBehaviour:
   fadeTexture: {fileID: 2800000, guid: e3e63e05844fc1b4a95b54f577196ce8, type: 3}
   fadeSpeed: 1
   drawDepth: -1000
+  delay: 2
+  loop: 0
 --- !u!4 &701100786
 Transform:
   m_ObjectHideFlags: 0
@@ -528,7 +526,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1189457737}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: -765806418, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
   m_Name: 
