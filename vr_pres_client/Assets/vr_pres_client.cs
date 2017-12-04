@@ -25,10 +25,10 @@ public class vr_pres_client : MonoBehaviour {
 
 	public string[] videoNames;
 	private string nextVideo;
-
+	/*
 	public VideoClip[] videoclips;
 	private VideoClip nextclip;
-
+	*/
 	public bool useTextures = false;
 
 	public int currentSlide = 0;
@@ -62,7 +62,7 @@ public class vr_pres_client : MonoBehaviour {
 	private bool bShouldFade = true;
 
 	private bool bLoadingVideo = false;
-	private bool bVideoLoaded = false;
+	//private bool bVideoLoaded = false;
 
 
 	private IEnumerator listenerCoroutine;
@@ -75,7 +75,7 @@ public class vr_pres_client : MonoBehaviour {
 
 	private bool done;
 	private float t;
-	public float delay = 5f;
+	public float delay = 0.1f;
 	public bool loop = false;
 
 
@@ -137,29 +137,8 @@ public class vr_pres_client : MonoBehaviour {
 		}
 
 
-		// Take care of the video loop
-		if (videoPlayer == null) {
-			return;
-		} else if (videoPlayer.PlayerState == GvrVideoPlayerTexture.VideoPlayerState.Ended && done) {
-			videoPlayer.Pause();
-			videoPlayer.CurrentPosition = 0;
-			done = false;
-			t = 0f;
-			return;
-		}
-		if (done) {
-			return;
-		}
+		playVideo ();
 
-		t += Time.deltaTime;
-		Debug.Log (videoPlayer.PlayerState);
-		if (t >= delay && videoPlayer != null) {
-			videoPlayer.Play();
-			Debug.Log ("playing");
-			done = true;
-		}
-
-		Debug.Log (videoPlayer.videoURL);
 
 
 				
@@ -319,17 +298,16 @@ public class vr_pres_client : MonoBehaviour {
 		doFade ();
 		nextTexture = textureName;
 	}
-
+	/*
 	void ChangeVideo(VideoClip clip){
 		doFade ();
 		nextclip = clip;
 	}
+	*/
 
 	void Change360Video(string videoName){
 		doFade ();
 		nextVideo = videoName;
-
-		videoPlayer.Play();
 	}
 
 	void doFade()
@@ -371,17 +349,20 @@ public class vr_pres_client : MonoBehaviour {
 					dome.GetComponent<Renderer> ().material.SetTexture ("_MainTex", slide);
 					updateText ();
 				} else {
+					/*
 					if (!bLoadingVideo) {
 						bVideoLoaded = false;
 						bLoadingVideo = true;
-
-						//should not be here
-						bVideoLoaded = true;
 					} else if (bVideoLoaded) {
 						fadeDir = -1.0f;
 						bLoadingVideo = false;
+						bVideoLoaded = false;
 						updateText ();
 					}
+					*/
+					bLoadingVideo = true;
+					fadeDir = -1.0f;
+					updateText ();
 				}
 
 			}
@@ -389,8 +370,8 @@ public class vr_pres_client : MonoBehaviour {
 				bShouldFade = false;
 			}
 
-			//fadecolor.a = alpha;
-			fadecolor.a = 0.0f;
+			fadecolor.a = alpha;
+			//fadecolor.a = 0.0f;
 
 			fade_canvas.GetComponent<Image>().color = fadecolor;
 
@@ -399,30 +380,59 @@ public class vr_pres_client : MonoBehaviour {
 
 	}
 
-	IEnumerator playVideo()
+	void playVideo()
 	{
 
 
-		string videoUrl = string.Format ("jar:file://${Application.dataPath}!/assets/{0}", nextVideo);
-		Debug.Log (videoUrl);
+		// Take care of the video loop
+		if (videoPlayer == null) {
+			Debug.Log ("no video player");
+			return;
+		} else if (videoPlayer.PlayerState == GvrVideoPlayerTexture.VideoPlayerState.Ended && done && !bLoadingVideo) {
+			videoPlayer.Pause ();
+			videoPlayer.CurrentPosition = 0;
+			done = false;
+			t = 0f;
+			return;
+		} else if (bLoadingVideo) {
+			videoPlayer.Pause();	
 
-		videoPlayer.videoURL = string.Format("jar:file://${Application.dataPath}!/assets/{0}", nextVideo);
+			Debug.Log ("enter loading video");
 
 
-		//Set video To Play then prepare Audio to prevent Buffering
-		videoPlayer.ReInitializeVideo ();
+			//string videoUrl = string.Format ("jar:file://${Application.dataPath}!/assets/{0}", nextVideo);
+			string nextVideoUrl = string.Format ("jar:file://${{Application.dataPath}}!/assets/{0}", nextVideo);
+			videoPlayer.CleanupVideo ();
+			videoPlayer.videoURL = nextVideoUrl;
+			//videoPlayer.videoURL = "jar:file://${Application.dataPath}!/assets/vid_bigbuckbunny.mp4";
 
-		//Play Video
-		videoPlayer.Play ();
+			videoPlayer.ReInitializeVideo ();
 
-		bVideoLoaded = true;
+			// reset play time for looper
+			videoPlayer.CurrentPosition = 0;
+			done = false;
+			t = 0f;
 
-		yield return null;
+			//bVideoLoaded = true;
+			bLoadingVideo = false;
+			Debug.Log ("loading video - done");
+
+		}
+
+		if (done) {
+			return;
+		}
+
+		t += Time.deltaTime;
+		if (t >= delay && videoPlayer != null && !bLoadingVideo) {
+			videoPlayer.Play();
+			done = true;
+		}
+
+
+
 
 	}
-
-
-
 
 
 }

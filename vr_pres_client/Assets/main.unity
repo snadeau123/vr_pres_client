@@ -281,7 +281,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: 38722f7e29e284a8bb3a91c83a5b8848, type: 2}
+  - {fileID: 2100000, guid: 6e7473ede8bd9c54c8fdacc48a3ffa91, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -344,9 +344,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 410d5a91205334dda9fd1bf3d325809a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  statusText: {fileID: 242554354}
+  statusText: {fileID: 0}
   videoType: 3
-  videoURL: jar:file://${Application.dataPath}!/assets/vid_bigbuckbunny.mp4
+  videoURL: jar:file://${Application.dataPath}!/assets/slide_03.mp4
   videoContentID: 
   videoProviderId: 
   initialResolution: 4096
@@ -385,13 +385,10 @@ MonoBehaviour:
   fadecolor: {r: 0, g: 0, b: 0, a: 0}
   textureNames:
   - Videos/slide_01
-  - Videos/slide_02
+  - Videos/slide_03
   videoNames:
-  - slide_03.mp4
-  - slide_04.mp4
-  videoclips:
-  - {fileID: 0}
-  - {fileID: 32900000, guid: 1c8b16f32f5cc7049867897128738728, type: 3}
+  - slide_01.mp4
+  - slide_02.mp4
   useTextures: 0
   currentSlide: 0
   targetSlide: 0
@@ -526,7 +523,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1189457737}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: -765806418, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
   m_Name: 
