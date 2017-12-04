@@ -365,10 +365,19 @@ public class vr_pres_client : MonoBehaviour {
 		videoPlayer = dome.GetComponent<VideoPlayer> ();
 
 		if (videoPlayer != null) {
+
+
+			while (!videoPlayer.isPrepared)
+			{
+				yield return null;
+			}
+
 			// avoid loading player when looping
 			float percentageFrame = ((float)videoPlayer.frame / (float)videoPlayer.frameCount);
-			videoPlayer.frame = 100;
-			videoPlayer.Stop ();
+			Debug.Log (percentageFrame);
+			//videoPlayer.frame = 100;  // probably cause the freeze in playback
+			//videoPlayer.Stop ();  // probably cause the freeze in playback
+
 			/*
 			while (percentageFrame < 0.1f || percentageFrame > 0.9f)
 			{
@@ -379,6 +388,9 @@ public class vr_pres_client : MonoBehaviour {
 			*/
 
 			Destroy (videoPlayer);
+
+
+
 		}
 
 		Debug.Log("test");
