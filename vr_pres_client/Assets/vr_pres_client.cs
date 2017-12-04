@@ -346,8 +346,8 @@ public class vr_pres_client : MonoBehaviour {
 			}
 
 
-			//fadecolor.a = alpha;
-			fadecolor.a = 0.0f;
+			fadecolor.a = alpha;
+			//fadecolor.a = 0.0f;
 
 			fade_canvas.GetComponent<Image>().color = fadecolor;
 
@@ -365,6 +365,19 @@ public class vr_pres_client : MonoBehaviour {
 		videoPlayer = dome.GetComponent<VideoPlayer> ();
 
 		if (videoPlayer != null) {
+			// avoid loading player when looping
+			float percentageFrame = ((float)videoPlayer.frame / (float)videoPlayer.frameCount);
+			videoPlayer.frame = 100;
+			videoPlayer.Stop ();
+			/*
+			while (percentageFrame < 0.1f || percentageFrame > 0.9f)
+			{
+				Debug.Log (percentageFrame);
+				
+				yield return null;
+			}
+			*/
+
 			Destroy (videoPlayer);
 		}
 
