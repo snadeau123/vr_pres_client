@@ -22,9 +22,13 @@ public class vr_pres_client : MonoBehaviour {
 	Texture2D slide;
 	public string[] textureNames;
 
+	private string nextTexture;
+
 	public VideoClip[] videoclips;
 
 	private VideoClip nextclip;
+
+	public bool useTextures = true;
 
 	public int currentSlide = 0;
 	public int targetSlide = 0;
@@ -69,8 +73,8 @@ public class vr_pres_client : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
-		//ChangeTexture (textureNames [0]);
-		ChangeVideo(videoclips[0]);
+		ChangeTexture (textureNames [0]);
+		//ChangeVideo(videoclips[0]);
 
 		listenerCoroutine = isConnectionActive ();
 		StartCoroutine (listenerCoroutine);
@@ -105,8 +109,8 @@ public class vr_pres_client : MonoBehaviour {
 
 
 		if (currentSlide != targetSlide) {
-			//ChangeTexture (textureNames [targetSlide]);
-			ChangeVideo(videoclips[targetVideo]);
+			ChangeTexture (textureNames [targetVideo]);
+			//ChangeVideo(videoclips[targetVideo]);
 			currentSlide = targetSlide;
 		}
 
@@ -275,10 +279,8 @@ public class vr_pres_client : MonoBehaviour {
 	}
 
 	void ChangeTexture(string textureName){
-		/*
-		slide = Resources.Load<Texture2D>(textureName);
-		dome.GetComponent<Renderer> ().material.SetTexture ("_MainTex", slide);
-		*/
+		doFade ();
+		nextTexture = textureName;
 	}
 
 	void ChangeVideo(VideoClip clip){
@@ -320,27 +322,32 @@ public class vr_pres_client : MonoBehaviour {
 			if (alpha >= 1.0f) {
 
 
-				if (!bLoadingVideo) {
-					//videoPlayer.Stop ();
-
-					//Debug.Log (string.Format ("Loading Video - 1 "));
-					videoPlayer.clip = nextclip;
-					videoPlayer.Prepare ();
-					//Debug.Log (string.Format ("Loading Video - 2"));
-					if (!videoPlayer.isPrepared)
-					{
-						return;
-					}
-
-					bLoadingVideo = true;
-				}
-				else if (videoPlayer.isPrepared) {
+				if (useTextures) {
 					fadeDir = -1.0f;
 					bLoadingVideo = false;
-					videoPlayer.Play ();
 
+					//Update Texture
+					slide = Resources.Load<Texture2D> (nextTexture);
+					dome.GetComponent<Renderer> ().material.SetTexture ("_MainTex", slide);
 					updateText ();
+				} else {
+					if (!bLoadingVideo) {
+						videoPlayer.clip = nextclip;
+						videoPlayer.Prepare ();
+						if (!videoPlayer.isPrepared) {
+							return;
+						}
+
+						bLoadingVideo = true;
+					} else if (videoPlayer.isPrepared) {
+						fadeDir = -1.0f;
+						bLoadingVideo = false;
+						videoPlayer.Play ();
+
+						updateText ();
+					}
 				}
+
 			}
 			if ((alpha <= 0.0f) && (fadeDir < 0.0f)) {
 				bShouldFade = false;
