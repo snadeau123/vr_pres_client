@@ -28,7 +28,7 @@ public class vr_pres_client : MonoBehaviour {
 
 	private VideoClip nextclip;
 
-	public bool useTextures = true;
+	public bool useTextures = false;
 
 	public int currentSlide = 0;
 	public int targetSlide = 0;
@@ -61,6 +61,7 @@ public class vr_pres_client : MonoBehaviour {
 	private bool bShouldFade = true;
 
 	private bool bLoadingVideo = false;
+	private bool bVideoLoaded = false;
 
 
 	private IEnumerator listenerCoroutine;
@@ -69,12 +70,14 @@ public class vr_pres_client : MonoBehaviour {
 	private string titleText = "";
 	private string contentText = "";
 
+	private VideoPlayer videoPlayer;
+
 
 	// Use this for initialization
 	void Start () {
 
-		ChangeTexture (textureNames [0]);
-		//ChangeVideo(videoclips[0]);
+		//ChangeTexture (textureNames [0]);
+		ChangeVideo(videoclips[0]);
 
 		listenerCoroutine = isConnectionActive ();
 		StartCoroutine (listenerCoroutine);
@@ -109,8 +112,8 @@ public class vr_pres_client : MonoBehaviour {
 
 
 		if (currentSlide != targetSlide) {
-			ChangeTexture (textureNames [targetVideo]);
-			//ChangeVideo(videoclips[targetVideo]);
+			//ChangeTexture (textureNames [targetVideo]);
+			ChangeVideo(videoclips[targetVideo]);
 			currentSlide = targetSlide;
 		}
 
@@ -120,11 +123,10 @@ public class vr_pres_client : MonoBehaviour {
 
 
 		// now check for input to recenter screen
-		/*
 		if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Began) {
 			GvrCardboardHelpers.Recenter ();
 		}
-		*/
+
 				
 	}
 
@@ -308,10 +310,6 @@ public class vr_pres_client : MonoBehaviour {
 
 	//void OnGUI () {
 	void Gui_fade () {
-		//GUILayout.Label(bConnActive.ToString());
-
-		//Debug.Log (string.Format("S: alpha : {0}    fadeDir : {1}    bLoadingVideo : {2}    isprep : {3}    shouldFade : {4}", alpha, fadeDir, bLoadingVideo, dome.GetComponent<VideoPlayer> ().isPrepared, bShouldFade));
-		VideoPlayer videoPlayer = dome.GetComponent<VideoPlayer> ();
 
 		if (bShouldFade) {
 			
@@ -332,18 +330,12 @@ public class vr_pres_client : MonoBehaviour {
 					updateText ();
 				} else {
 					if (!bLoadingVideo) {
-						videoPlayer.clip = nextclip;
-						videoPlayer.Prepare ();
-						if (!videoPlayer.isPrepared) {
-							return;
-						}
-
+						bVideoLoaded = false;
+						StartCoroutine (playVideo());
 						bLoadingVideo = true;
-					} else if (videoPlayer.isPrepared) {
+					} else if (bVideoLoaded) {
 						fadeDir = -1.0f;
 						bLoadingVideo = false;
-						videoPlayer.Play ();
-
 						updateText ();
 					}
 				}
@@ -354,20 +346,79 @@ public class vr_pres_client : MonoBehaviour {
 			}
 
 
-			fadecolor.a = alpha;
+			//fadecolor.a = alpha;
+			fadecolor.a = 0.0f;
 
-
-			//GUI.color = newColor;
-			//Debug.Log (string.Format ("Changing canvas alpha - 1"));
 			fade_canvas.GetComponent<Image>().color = fadecolor;
-			//Debug.Log (string.Format ("Changing canvas alpha - 2"));
-
 
 			//GUI.depth = drawDepth;
 
 			//GUI.DrawTexture (new Rect (0, 0, Screen.width, Screen.height), fadeTexture);
 		}
 		//Debug.Log (string.Format("E: alpha : {0}    fadeDir : {1}    bLoadingVideo : {2}    isprep : {3}    shouldFade : {4}", alpha, fadeDir, bLoadingVideo, dome.GetComponent<VideoPlayer> ().isPrepared, bShouldFade));
+	}
+
+	IEnumerator playVideo()
+	{
+
+		//Add VideoPlayer to the GameObject
+		videoPlayer = dome.GetComponent<VideoPlayer> ();
+
+		if (videoPlayer != null) {
+			Destroy (videoPlayer);
+		}
+
+		Debug.Log("test");
+
+		//Add VideoPlayer to the GameObject
+		videoPlayer = dome.AddComponent<VideoPlayer>();
+
+		//Add AudioSource
+
+		//Disable Play on Awake for both Video and Audio
+		videoPlayer.playOnAwake = false;
+
+		videoPlayer.isLooping = true;
+
+		//We want to play from video clip not from url
+
+		//videoPlayer.clip = nextclip;
+		videoPlayer.source = VideoSource.VideoClip;
+		videoPlayer.clip = nextclip;
+
+
+		//Set video To Play then prepare Audio to prevent Buffering
+		videoPlayer.Prepare();
+
+		//Wait until video is prepared
+		while (!videoPlayer.isPrepared)
+		{
+			yield return null;
+		}
+
+		Debug.Log("Done Preparing Video");
+
+		//Assign the Texture from Video to RawImage to be displayed
+		dome.GetComponent<Renderer> ().material.SetTexture ("_MainTex", videoPlayer.texture);
+		//image.texture = videoPlayer.texture;
+
+		//Play Video
+		videoPlayer.Play();
+		Debug.Log("Playing Video");
+
+		/*
+		Debug.Log("Playing Video");
+		while (videoPlayer.isPlaying)
+		{
+			Debug.LogWarning("Video Time: " + Mathf.FloorToInt((float)videoPlayer.time));
+			yield return null;
+		}
+
+		Debug.Log("Done Playing Video");
+		*/
+
+		bVideoLoaded = true;
+
 	}
 
 
