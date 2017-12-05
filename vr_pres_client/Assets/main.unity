@@ -387,8 +387,11 @@ MonoBehaviour:
   - Videos/slide_01
   - Videos/slide_03
   videoNames:
-  - slide_01.mp4
-  - slide_02.mp4
+  - cave_stereo_2k.mp4
+  - clouds_stereo_2k.mp4
+  - scifi_stereo_2k.mp4
+  - forest_stereo_2k.mp4
+  - city_stereo_2k.mp4
   useTextures: 0
   currentSlide: 0
   targetSlide: 0
